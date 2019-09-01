@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+    <xsd:import namespace="http://oval.mitre.org/XMLSchema/oval-variables-5" schemaLocation="oval-5.8/oval-variables-schema.xsd"/>
+</xsd:schema>

@@ -1,0 +1,19 @@
+
+
+opcion 1
+./CIS-CAT.sh -aa 
+
+
+
+
+Examples:
+**** SCAP 1.2 ****
+./CIS-CAT.sh -b <DS-COLLECTION-XML-FILE> -ds <DATASTREAM-ID> [-xc <XCCDF-ID>] [-p <PROFILE-ID]
+**** SCAP 1.1 and Prior ****
+./CIS-CAT.sh -b <BENCHMARK-XML-FILE> [-p <PROFILE-ID>]
+**** OVAL Definitions File ****
+**** NOTE: When executing CIS-CAT against an OVAL Definitions file,
+****       no HTML report should be created (-n), and only the OVAL
+****       Results report (-or) is applicable...
+./CIS-CAT.sh -od <OVAL-DEFINITIONS-FILE> -ov <OVAL-VARIABLES-FILE> -s -n -or
+CIS-CAT Terminated Successfully.
