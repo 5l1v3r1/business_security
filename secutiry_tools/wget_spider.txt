@@ -1,0 +1,134 @@
+Cómo Usar el Comando Wget
+
+entarlo en Mac OS X, Microsoft Windows, AmigaOS y otras plataformas populares.
+¿Cómo instalar Wget?
+
+Para esta demostración del comando wget, usaremos Ubuntu 16.04. Pero la sintaxis también funcionará en cualquier otra versión de Linux.
+
+En primer lugar, accede a tu servidor a través de SSH. Ejecuta el siguiente comando para instalar wget en su sistema:
+
+    apt-get install wget
+
+Una vez que finalice la configuración, estará listo para usarlo. Además, el conocimiento de los comandos básicos de SSH puede facilitar las cosas.
+Ejemplos de Comandos Wget
+
+Para comenzar, proporcionaremos 12 ejemplos de comandos wget que puedes usar en tareas cotidianas. ¡Ten en cuenta que también puedes llamar a esta función desde scripts y cron jobs!
+Usando el comando Wget para descargar archivos individuales
+
+Uno de los ejemplos más básicos del comando wget es descargar un único archivo y almacenarlo en su directorio de trabajo actual. Por ejemplo, puede obtener la última versión de WordPress usando lo siguiente:
+
+    wget https://wordpress.org/latest.zip
+
+Aquí está el resultado que verás:
+
+    --2018-02-23 12:53:10-- https://wordpress.org/latest.zip
+    Resolving wordpress.org (wordpress.org)... 198.143.164.252
+    Connecting to wordpress.org (wordpress.org)|198.143.164.252|:443... connected.
+    HTTP request sent, awaiting response... 200 OK
+    Length: 9332728 (8,9M) [application/zip]
+    Saving to: 'latest.zip'
+    latest.zip 100%[===================>] 8,90M 6,88MB/s in 1,3s
+    2018-02-23 12:53:14 (6,88 MB/s) - 'latest.zip' saved [9332728/9332728]
+
+En este ejemplo, se descargará un archivo llamado latest.zip en el directorio de trabajo actual. También verá información adicional, como el progreso de la descarga, la velocidad, el tamaño, la hora y la fecha.
+
+Usando el comando Wget para descargar varios archivos
+Podemos llevar el uso de wget un paso más allá y descargar múltiples archivos a la vez. Para hacer esto, necesitaremos crear un documento de texto y ubicar las URL de descarga allí. En este ejemplo, recuperaremos las últimas versiones de WordPress, Joomla y Drupal. Introduzca la siguiente:
+
+    nano example.txt
+
+Esto creará un archivo example.txt y abrirá una interfaz de editor de texto. Pega estos enlaces allí:
+
+    https://wordpress.org/latest.zip
+    https://downloads.joomla.org/cms/joomla3/3-8-5/Joomla_3-8-5-Stable-Full_Package.zip
+    https://ftp.drupal.org/files/projects/drupal-8.4.5.zip
+
+Una vez hecho esto, puede usar -i para obtener todos los archivos almacenados en tu archivo de texto de ejemplo:
+
+    wget -i example.txt
+
+Espera a que el proceso finalice y tendrsá las instalaciones de los tres sistemas de administración de contenido más populares.
+Usar el comando Wget para obtener archivos bajo nombres diferentes
+
+En este ejemplo de wget, guardaremos un archivo usando un nombre diferente con la ayuda de la opción -O:
+
+    wget -O wordpress-install.zip https://wordpress.org/latest.zip
+
+En este caso, el recurso descargado se guardará como wordpress-install.zip en lugar de su nombre original.
+Usar el comando Wget para guardar archivos en el directorio especificado
+
+Puedes utilizar wget para colocar un archivo en otro directorio usando la función -P:
+
+    wget -P documents/archives/ https://wordpress.org/latest.zip
+
+El archivo que recuperes usando esta sintaxis aparecerá en documentos/archivos/ carpeta.
+Usar el comando Wget para limitar la velocidad de descarga
+
+Con wget, también puedes limitar la velocidad de descarga. Esto es útil cuando recuperas archivos grandes y evitará que use todo tu ancho de banda. Este ejemplo de wget establecerá el límite a 500k:
+
+    wget --limit-rate=500k https://wordpress.org/latest.zip
+
+Uso del comando Wget para establecer cantidad de reintento
+
+Los problemas de conexión a Internet pueden hacer que la descarga se interrumpa. Para abordar este problema, podemos aumentar la cantidad de reintentos usando la función -tries:
+
+    wget -tries=100 https://wordpress.org/latest.zip
+
+Usar el comando Wget para descargas en segundo plano
+
+Para archivos extremadamente grandes, puede aprovechar la función -b. Descargará su contenido en segundo plano.
+
+    wget -b http://example.com/beefy-file.tar.gz
+
+Un wget-log aparecerá en tu directorio de trabajo, que se puede usar para verificar el progreso y el estado de tu descarga. Este comando también hará el truco:
+
+    tail -f wget-log
+
+Usando el comando Wget para descargar a través de FTP
+
+El comando también se puede usar con FTP. Solo necesitarás especificar el nombre de usuario y la contraseña como en este ejemplo de wget:
+
+    wget --ftp-user=YOUR_USERNAME --ftp-password=YOUR_PASSWORD ftp://example.com/something.tar
+
+Usando el comando Wget para continuar las descargas interrumpidas
+
+Tu descarga puede interrumpirse si pierdes la conexión a Internet o experimenta un corte de energía. Esto es bastante frecuente cuando se obtienen archivos enormes. En lugar de comenzar de nuevo, es posible continuar la descarga usando la función -c:
+
+    wget -c https://example/very-big-file.zip
+
+Si continúas sin la función -c, el nuevo archivo tendrá .1 agregado al final tal como ya existe.
+Usando el comando Wget para recuperar sitios web completos
+
+También es posible usar el comando wget para descargar el contenido de un sitio completo. Esto le permitirá verlo localmente sin una conexión a Internet. Aquí hay un ejemplo:
+
+    wget --mirror --convert-links --page-requisites --no-parent -P documents/websites/ https://some-website.com
+
+Analicemos los ingredientes de este comando wget:
+
+-mirror Hace que la descarga sea recurrente.
+-convert-links Todos los enlaces se convertirán para un uso fuera de línea.
+-page-requisities Lo siguiente incluirá todos los archivos necesarios tales como CSS, JS e imágenes.
+-no-parent Asegura que los directorios que están por encima de la jerarquía no se recuperen.
+-P Esto asegura que todo el contenido vaya a nuestro directorio especificado.
+
+Una vez que el proceso finalice, podrás abrir el sitio web descargado localmente y encontrar todos los archivos en documentos/sitios web/ carpeta.
+Usando el comando Wget para localizar enlaces rotos
+
+Intentemos algo más avanzado. Podemos usar el comando wget para localizar todas las URL rotas que muestran el error 404 en un sitio web específico. Comienza ejecutando lo siguiente:
+
+wget -o wget-log -r -l 5 --spider http://example.com
+
+-o Recopila la salida en un archivo para su uso posterior.
+-l Especifica el nivel de recurrencia.
+-r Hace que la descarga sea recurrente.
+-spider Configura wget en el modo araña.
+
+Ahora podemos investigar el archivo wget-log para encontrar la lista de enlaces rotos. Aquí está el comando para hacerlo:
+
+    grep -B 2 '404' wget-log | grep "http" | cut -d " " -f 4 | sort -u
+
+Usando el comando Wget para descargar archivos numerados
+
+Si tienes archivos o imágenes numeradas en una lista determinada, puedes descargarlas fácilmente con la siguiente sintaxis:
+
+    wget http://example.com/images/{1..50}.jpg

@@ -1,0 +1,86 @@
+Apache Bench (ab) is a common tool for measuring the performance of HTTP servers in a Linux environment. It works by generating a flood of requests to a given URL and returns some easily digestible performance related metrics to the screen. This simplicity makes it appealing for running quick and dirty load tests, and a nice benefit to uncovering limits in your web stack or a service bottleneck that you did not anticipate.
+I personally use ab (and other similar tools) to help me answer the following questions:
+What is my application’s average response time at a large number of simultaneous users or connections?
+What is the maximum number of requests-per-second that my application can handle?
+At what point will my application break?
+Based on my experience, below are some tips and gotchas that may help others using ab to stress test their own environments.
+
+1) Know that the tool is unsympathetic
+Running ab is like a denial-of-service attack. This particular tool is not designed to be sympathetic to your infrastructure, and provides no ability to increase concurrency in measured intervals over a testing period.
+The only option when running a load test through ab is to flood your web server with an arbitrary number of simultaneous requests all in one instant.
+Although the inability to scale up requests will not prevent you from running successful tests, you should be aware that it can pose additional challenges in performing good tests that yield consistent and accurate test results.
+One way this can impact your tests is when your application needs time to initialize due to a large import registry, complete a setup process, or load data from a cold cache. Thus, overloading the application with requests can inflate the response times, as witnessed in this example:
+
+
+blitz.io report showing poor initial response times due to high number of concurrent users
+The initialization problem can usually be overcome simply by running a test for several minutes to normalize the average response time; however in some cases, overloading the server with requests during startup can put the application in an unrecoverable state that negatively affects results for the entire test duration.
+Another downside of not having the ability to send concurrency gradually is that you end up running many independent tests manually increasing concurrency to figure out your breakpoint. These are called the guess-and-check tests. Not only is this method cumbersome, but it’s also unlikely to cover enough data points to notice if the application responds unfavorably at different stages of concurrency.
+
+
+blitz.io report showing possible changes in response times at various stages of concurrency
+The above example shows fluctuations in response times after the 30 second mark that may have go unnoticed using ab and arbitrarily picking concurrency values.
+
+2) Use verbose to debug a high number of failed requests
+By default, ab assumes that the content length of a response will be the same for the duration of a test. It stores the content length of the first response and compares that value against all further responses, marking any difference as a “length-type” failure.
+If you are not serving content of variable length, then this failure can be an indication of a problem worth investigating.
+For example, an application that catches all exceptions on the backend and returns an HTTP 200 status with a “success” or “failure” message could likely fool a benchmark. In this example, a success could take 100 ms to process while an error returns in just 5 ms, however, without checking content-length, all responses would appear normal and the test results would show a very impressive requests-per-second value — albeit incorrectly.
+Running ab with verbosity enabled can help identify the reason for the length discrepancy. Using the -v 2 option, ab will dump each response’s body and header to stdout so that you can identify the success or failure.
+ab -n 1 -v 2 http://www.example.com/
+>LOG: header received:
+>HTTP/1.0 200 OK
+>…
+>Content-Length: 1568399
+Of course, if you are testing variable responses or returning non-200 HTTP codes in the event of any error, you should simply ignore length checking with the -l option.
+
+3) Be mindful of unnecessary variance in network latency
+If your servers are hosted in Amazon Web Services — Virginia and you run ab from your computer in San Francisco, you are likely making things harder for yourself from a latency perspective. Testing will yield an extra 60–100 ms to each request and it will require more resources (open connections and io wait) for the client to maintain the same load when otherwise no network latency is present.
+Take a moment to spin up a server in the same locality as the one you intend to test and avoid running ab on localhost so that it doesn’t pose as its own bottleneck.
+In your bench results displayed under Waiting — the time between the last byte of the request and the first byte of the response, you will see an integer that should be close to zero. Otherwise, you may need to debug why network latency is creeping into the test results.
+
+4) Use keep-alive, but know it may be faulty
+When sending HTTP requests, the connection made to the server is normally closed after each response. With keep-alive setting (also known as persistent connections), the client maintains an underlying TCP connection open to facilitate multiple requests and response; this eliminates the slow and costly connection initialization time that would otherwise be present. To use this setting, pass the -k boolean option:
+ab -k
+The minimum resources needed to keep connections open usually outweigh the cost of creating connections; this is especially true for high performance applications when the connection time can be a significant percentage of the overall response time.
+However, one problem with ab is that it uses HTTP 1.0, and keep-alive can only be possible in HTTP 1.0 if the client specifically requests it in the header and if the server knows the content-length of the response at the onset. This means that keep-alive will not likely work with intermediate proxies and possibly dynamically generated responses where the response length changes.
+To make sure that your testing results are not skewed, check that the mean Connect — time for how long it took to establish a connection with the server, is near zero:
+Connection Times (ms)
+            min     median  [+/-sd] median  max
+Connect:    0       0       2.9     0       29
+Processing: 11      20      5.6     19      42
+Waiting:    11      20      5.6     19      41
+Total:      11      20      6.8     19      59
+
+5) Correctly use the timelimit option
+There is a poorly designed feature in ab that may cause you headaches if you are trying to run a load test for a specified period of time.
+One would expect that using the -t timelimit option would result in the load test sending URL requests for so long as the limit time is not reached. However, a non-obvious default setting for that feature may actually cause your load test to run for a shorter amount of time than you intended.
+This example may not actually run for 60 seconds:
+ab -t 60 http://www.example.com/
+As per its documentation, if -n number of requests is not specified, ab will default to a maximum of 50,000 requests and immediately terminate the run. If your application handles requests very quickly, then this maximum can be reached well below the actual timelimit you set.
+Maximum number of seconds to spend for benchmarking. This implies a -n 50000 internally. Use this to benchmark the server within a fixed total amount of time. Per default there is no timelimit.
+This isn’t hard to fix because you simply need to specify the -n option and set it to an arbitrarily high number, right? Yes, but you also need to pass the -n option in the correct order for it to be effective.
+This will not work:
+ab -n 10000000 -t 60 http://www.example.com/
+But this will:
+ab -t 60 -n 10000000 http://www.example.com/
+I doubt there was intention by the developers to create confusion for the users, but it’s certainly a poor gotcha in the design that can lead to some frustration.
+
+6) Better simulate a realistic load scenario
+Most web services run applications with different degrees of complexity. A single application can have multiple dispatchers and URL handlers for processing incoming requests. Even logic within a single handler can branch code in a way that makes one particular request take much longer to respond than another. Whatever the case, it is usually a good idea to test a mix of different URLs in order to simulate a real-world scenario.
+Unfortunately, while ab can perform concurrent requests to a single URL, it cannot do the same across a multiple set of URLs or domains.
+One workaround is to use a utility called parallel which allows the user to execute multiple shell scripts (such as calling ab) in parallel.
+Installing this tool is simple on Ubuntu:
+sudo apt-get install parallel
+Afterwards, create a text file myurls.txt and populate it with one target URL per line:
+http://www.example.com/
+http://www.example.com/foo.html
+http://www.example.com/foo/bar/
+http://www.example.com/foo/bar/?v=1
+This file is read and each URL will passed into ab through parallel as such:
+cat myurls.txt | parallel "ab -n 10000 -c 10 {}"
+The output on screen will be the response from each ab command in the order that each one first completes.
+One drawback of this approach is that this will create multiple reports for you to summarize and percentages in these report that are already aggregated cannot be further combined.
+If you need to have a total distribution of percentages of requests served within a certain time, then it may be possible to do so by logging application response times directly to a service like Datadog.
+
+7) Keep an eye on fast servers and slow testing environments
+Apache Bench is single threaded program that can only take advantage of one processor on your client’s machine. In extreme conditions, the tool could misrepresent results if the parameters of your test exceed the capabilities of the environment the tool is running in.
+Although it takes a lot to hit these limits, be sure to monitor the cpu usage for ab’s process (using htop or similar). This can ensure that poor results are not a symptom of errors or cpu wait from high load and context switching.

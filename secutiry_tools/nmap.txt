@@ -1,0 +1,173 @@
+Nmap (Abreviatura de Network Mapper) es la mejor herramienta de línea de comandos en Linux (también disponible para Windows y Mac OS X) para realizar funciones de auditoría y seguridad de redes, rastreo y análisis en busca de sistemas para elaborar un inventario de red, etc. 
+Todo esto de forma gratuita y bajo licencia open source. Lanzando un escaneo de red con Nmap podemos visualizar una gran cantidad de información: hosts activos en la red, sistema operativo que están ejecutando, puertos y servicios abiertos a través de la red, tipos de firewall que están utilizando
+
+Instalación de Nmap
+
+Para CentOS, RHEL, Fedora, Scientific Linux podemos instalarlo directamente a partir de los repositorios base del sistema:
+# yum install nmap
+En Debian y Ubuntu también:
+# apt-get install nmap
+
+Para Windows, os podéis descargar los binarios del sitio web oficial de Nmap.
+
+Uso y ejemplos de Nmap
+
+Una vez presentado el comando y su modo de instalación, vamos a ir directamente a los ejemplos que nos muestran algunas de sus capacidades y a confirmar su facilidad de uso, potencia y flexibilidad. Lo primero que deberéis echar un vistazo es a las opciones generales de uso, para ello lanzamos el comando sin parámetros:
+
+# nmap
+Nmap 6.40 ( http://nmap.org )
+Usage: nmap [Scan Type(s)] [Options] {target specification}
+TARGET SPECIFICATION:
+  Can pass hostnames, IP addresses, networks, etc.
+  Ex: scanme.nmap.org, microsoft.com/24, 192.168.0.1; 10.0.0-255.1-254
+  -iL : Input from list of hosts/networks
+  -iR : Choose random targets
+  --exclude <host1[,host2][,host3],...>: Exclude hosts/networks
+  --excludefile : Exclude list from file
+
+HOST DISCOVERY:
+  -sL: List Scan - simply list targets to scan
+  -sn: Ping Scan - disable port scan
+  -Pn: Treat all hosts as online -- skip host discovery
+  -PS/PA/PU/PY[portlist]: TCP SYN/ACK, UDP or SCTP discovery to given ports
+  -PE/PP/PM: ICMP echo, timestamp, and netmask request discovery probes
+  -PO[protocol list]: IP Protocol Ping
+  -n/-R: Never do DNS resolution/Always resolve [default: sometimes]
+  --dns-servers <serv1[,serv2],...>: Specify custom DNS servers
+  --system-dns: Use OS's DNS resolver
+
+Especificar Host o red a escanear
+
+Algo básico para comenzar es saber, que podemos tanto escanear un único host en busca de información sobre el mismo (servicios abiertos, puertos de escucha, sistema operativo…), como una red completa. 
+Si queremos escanear una red podemos especificar la máscara en formato CIDR, rango concreto de IPs (10.0.0-255.1-254)
+El modo más básico de escanear un host es indicar su IP o hostname como parámetro a Nmap:
+
+# nmap 192.168.1.100
+
+Starting Nmap 6.40 ( http://nmap.org ) at 2014-09-26 18:12 CEST
+Nmap scan report for centos7 (192.168.1.100)
+Host is up (0.000023s latency).
+Not shown: 999 closed ports
+PORT   STATE SERVICE
+22/tcp open  ssh
+
+Nmap done: 1 IP address (1 host up) scanned in 2.56 seconds
+Como podéis observar, este escaneo sencillo nos muestra el sistema operativo del host, los puertos abiertos/cerrados/filtrados y los servicios asociados. Esto mismo lo podríamos hacer para un segmento de red completo y ejecutaría el escaneo en todas las máquinas de la red:
+
+# nmap 192.168.1.0/24
+
+Si queremos excluir algún host de la red, los especificamos con el parámetro «–exclude» seguido de los hosts separados por comas:
+# nmap 192.168.1.0/24 --exclude 192.168.1.1,192.168.1.100
+
+Podemos leer los hosts a incluir y excluir en el escaneo directamente de una lista en archivo de texto.
+Escanear hosts de un archivo:
+# nmap -iL archivo_de_entrada
+Excluir hosts de un archivo:
+# nmap --excludefile archivo_de_entrada
+Encontrar hosts de una red
+Con los ejemplos anteriores, además de buscar hosts en una red también se escaneaban todos los puertos y servicios de cada host. Esto llevará bastante tiempo, así que si lo que queremos es únicamente hacer un rastreo rápido de la red en busca de los hosts que están online tenemos los 10.111.1.114siguientes ejemplos:
+Mostrar una lista de los hosts de la red sin mandar ningún tipo de paquete al host, únicamente ejecuta un Reverse DNS para encontrar el hostname:
+# nmap -sL 192.168.1.0/24
+Buscar hosts pero sin efectuar escaneo de puertos. Básicamente es un «ping scan», sólo lanza un ping al host y si responde lo lista por pantalla:
+# nmap -sn 192.168.1.0/24
+Buscar hosts mediante ping a los hosts:
+# nmap -sP 192.168.1.0/24
+Escaneo de puertos
+Con el primer comando que hemos ejecutado ya se estaban escaneando los puertos de cada host que se consultaba. Concretamente sin parámetros se escanean 1000 puertos TCP. El estado de los puertos se divide en los siguientes, y así es como nos lo mostrará en la salida del comando: open, closed, filtered, unfiltered, open|filtered, y closed|filtered. Básicamente, puerto abierto, cerrado, filtrado, no filtrado, abierto|filtrado y cerrado|filtrado.
+La técnica de escaneo es realmente amplia, hay muchísimas combinaciones y parámetros disponibles así que me voy a ceñir a mostrar unos cuantos ejemplos. Os remito a la documentación oficial que podéis encontrar en un enlace al final de artículo para mayor detalle y ejemplos bastante más complejos y con funciones específicas.
+
+Escanear todos los puertos de un host con información extendida (verbose):
+# nmap -v 192.168.1.100
+Escanear un único puerto en un host:
+# nmap -p 80 192.168.1.100
+Buscar puertos TCP abiertos en una máquina:
+nmap -sT 192.168.1.100
+Buscar puertos UDP abiertos en una máquina:
+nmap -sU 192.168.1.100
+Escaneo de protocolos de un host (además de TCP,UDP, muestra disponibilidad de ICMP, IGMP…):
+nmap -sO 192.168.1.100
+Escanear un rango de puertos:
+# nmap -p 80-200 192.168.1.100
+Escanear un rango de puertos y unos puertos específicos, tanto TCP como UDP:
+# nmap -p U:53,161,8888,T:1000-2000,80,25,8888,8080 192.168.1.100
+Detección de versión de sistema operativo
+Con este comando de Nmap podemos averiguar el sistema operativo del host y otra información como los puertos abiertos, el uptime de la máquina…
+# nmap -v -O --osscan-guess localhost
+Ejemplo de salida del comando:
+Initiating SYN Stealth Scan at 18:56
+Scanning localhost (127.0.0.1) [1000 ports]
+Discovered open port 22/tcp on 127.0.0.1
+Discovered open port 25/tcp on 127.0.0.1
+Completed SYN Stealth Scan at 12:56, 2.51s elapsed (1000 total ports)
+Initiating OS detection (try #1) against localhost (127.0.0.1)
+Nmap scan report for localhost (127.0.0.1)
+Host is up (0.000030s latency).
+Other addresses for localhost (not scanned): 127.0.0.1
+Not shown: 998 closed ports
+PORT   STATE SERVICE
+22/tcp open  ssh
+25/tcp open  smtp
+Device type: general purpose
+Running: Linux 3.X
+OS CPE: cpe:/o:linux:linux_kernel:3
+OS details: Linux 3.7 - 3.9
+Uptime guess: 0.004 days (since Fri Sep 26 12:50:15 2014)
+Network Distance: 0 hops
+TCP Sequence Prediction: Difficulty=259 (Good luck!)
+IP ID Sequence Generation: All zeros
+
+Read data files from: /usr/bin/../share/nmap
+OS detection performed. Please report any incorrect results at http://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 5.46 seconds
+           Raw packets sent: 1119 (51.988KB) | Rcvd: 2250 (98.720KB)
+Detectar versiones de los servicios en ejecución en el host
+# nmap -sV 192.168.1.100
+Muestra de la salida del comando:
+Starting Nmap 5.21 ( http://nmap.org ) at 2014-09-26 18:21 CEST
+Nmap scan report for localhost (127.0.0.1)
+Host is up (0.0000040s latency).
+Not shown: 998 closed ports
+PORT    STATE SERVICE VERSION
+22/tcp  open  ssh     OpenSSH 5.8p1 Debian 1ubuntu3 (protocol 2.0)
+631/tcp open  ipp     CUPS 1.4
+Service Info: OS: Linux
+También podemos forzar un escaneo más intensivo para buscar toda la información de versión de software y servicios posible con el parámetro «–version-all»
+
+# nmap -sV --version-all localhost
+
+Starting Nmap 6.40 ( http://nmap.org ) at 2014-09-26 18:05 CEST
+Nmap scan report for localhost (127.0.0.1)
+Host is up (0.000073s latency).
+Other addresses for localhost (not scanned): 127.0.0.1
+Not shown: 998 closed ports
+PORT   STATE SERVICE VERSION
+22/tcp open  ssh     OpenSSH 6.4 (protocol 2.0)
+25/tcp open  smtp    Postfix smtpd
+Service Info: Host:  localhost.localdomain
+Escaneo de hosts detrás de un firewall
+Si un firewall está bloqueando, por ejemplo, el protocolo ICMP, podemos utilizar otros métodos para buscar hosts en una red, en estos ejemplos hacemos uso de TCP ACK (parámetro PA) y TCP Syn (parámetro PS)
+# nmap -PS 192.168.1.100
+# nmap -PA 192.168.1.100
+También podemos averiguar con nmap si el host se encuentra detrás de un firewall:
+# nmap -sA 192.168.1.100
+Mostrar rutas e interfaces de red del host
+# nmap --iflist 192.168.1.100
+
+Starting Nmap 5.21 ( http://nmap.org ) at 2014-09-26 18:45 CEST
+************************INTERFACES************************
+DEV  (SHORT) IP/MASK        TYPE     UP MAC
+lo   (lo)    127.0.0.1/8    loopback up
+eth0 (eth0)  192.168.1.100/24 ethernet up XX:XX:XX:XX:XX:XX
+
+**************************ROUTES**************************
+DST/MASK      DEV  GATEWAY
+192.168.1.0/0  eth0
+169.254.0.0/0 eth0
+0.0.0.0/0     eth0 192.168.1.1
+Nmap e IPv6
+Todos los ejemplos anteriores estaban basados en IPv4. Para que los escaneos se realicen contra IPv6 utilizamos el parámetro «-6», valdría para cualquier ejemplo anterior añdiendo el parámetro y cambiando por una IPv6:
+# nmap -6 -v FE80:0000:0000:0000:0202:B3FF:FE1E:8329
+# nmap -sV -6 FE80:0000:0000:0000:0202:B3FF:FE1E:8329
+# nmap -p 80 -6 FE80:0000:0000:0000:0202:B3FF:FE1E:8329
+
+

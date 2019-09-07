@@ -1,0 +1,9 @@
+tunel ssh para svn
+
+sudo ssh -L 443:localhost:443 ghcetraro@bob.ce.ad -p7337
+
+
+tunel ssh para vnc
+
+sudo ssh -L 5900:localhost:5900 ghcetraro@bob.ce.ad -p7337
+
