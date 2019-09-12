@@ -3,7 +3,7 @@
 ## A list of several Benchmark Tools
 
 - Benchmark
-- Imag
+- Image
 - Others
 - Scripts
 - Secutiry_tools 
