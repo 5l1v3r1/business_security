@@ -1,9 +1,21 @@
-#ignore
+#others
+*~
+gitignore~
+git~
 
+·docs
 .txt~
 .doc~
+
+#scripts
 .sh~
 .ps1~
+.py~
 
+#enviroment
 .env
 .env~
+
+#binary
+.exe
+.bin

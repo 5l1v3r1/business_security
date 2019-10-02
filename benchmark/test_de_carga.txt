@@ -1,0 +1,16 @@
+Test de carga semi-manual
+
+-- Primero obtenga las url a hacer el test
+wget -o wget-log -r -l 5 --spider http://example.com
+
+-- Le saco la basura al archivo
+cat wget-log | grep example.com | awk -F ' ' '{print $2}' | grep example.com > fichero1
+
+-- Si corresponde, le saco las extensiones que le agrega
+sed 's/.tmp./ /g' fichero1 > fichero2
+
+-- Cuento cuantas urls obtuve
+wc -l fichero2
+
+-- Finalmente realizo la prueba de carga
+cat fichero2 | parallel "ab -n 10 -c 10 {}"
