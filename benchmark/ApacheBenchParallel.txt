@@ -5,6 +5,10 @@ What is the maximum number of requests-per-second that my application can handle
 At what point will my application break?
 Based on my experience, below are some tips and gotchas that may help others using ab to stress test their own environments.
 
+-- install
+
+sudo apt-get install apache2-utils
+
 1) Know that the tool is unsympathetic
 Running ab is like a denial-of-service attack. This particular tool is not designed to be sympathetic to your infrastructure, and provides no ability to increase concurrency in measured intervals over a testing period.
 The only option when running a load test through ab is to flood your web server with an arbitrary number of simultaneous requests all in one instant.
