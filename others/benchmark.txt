@@ -1,0 +1,22 @@
+Bajo licencia:
+	Trendmicro.com
+	Agigee – (google.com)
+	https://www.banyansecurity.io/
+	Citrix – también tiene una versión que salió del ultimo foro
+
+
+Bajo Comunidad y también licencia
+	https://coreos.com
+	https://www.open-scap.org/
+	https://grafeas.io/
+	https://www.cisecurity.org
+
+
+Bajo Comunidad
+	https://github.com/docker/docker-bench-security
+	https://github.com/cilium/cilium
+	https://github.com/anchore/anchore-engine
+	https://github.com/theupdateframework/notary
+	https://github.com/eliasgranderubio/dagda
+	https://github.com/falcosecurity/falco
+	https://github.com/banyanops/collector
