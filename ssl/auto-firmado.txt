@@ -1,0 +1,9 @@
+-- Create 
+
+openssl req -new -nodes -keyout linuxito.key -out linuxito.csr -days 3650
+
+-- Self-Signed
+
+openssl x509 -req -days 3650 -in linuxito.csr -signkey linuxito.key -out linuxito.crt
+
+

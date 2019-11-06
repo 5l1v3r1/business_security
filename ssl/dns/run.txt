@@ -1,0 +1,7 @@
+-- Create
+
+openssl req -out domain.csr -newkey rsa:2048 -nodes -keyout domain.key -config domain.conf
+
+-- Conver 509x to PFX
+
+openssl pkcs12 -export -name "*domain.com" -out domain.pfx -inkey domain.key -in domain.crt
