@@ -1,0 +1,62 @@
+Herramientas de scaneo de seguridad linux/docker/kubernetes
+
+Pagos
+
+Tren micro -- deep security
+Aporeto
+BlackDuck Docker security
+AquaSec
+Twistlock
+Tenable Flawcheck
+StackRox
+Sysdig Secure
+NeuVector
+Notary	
+OpenSCAP	
+Google Cloud Security Command Center
+HashiCorp Vault
+Layered Insight
+Cilium
+Cavirin
+Capsule 8
+
+OpenSource
+
+Anchore Engine
+AppArmor
+Calico
+Sysdig
+Seccomp
+SELinux
+REMnux
+Open Policy agent
+Falco
+Docker-bench security
+Dockscan
+Docker capabilities and resource quotas	
+CoreOS Clair	
+ 
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
